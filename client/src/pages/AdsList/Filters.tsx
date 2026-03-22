@@ -1,9 +1,11 @@
 import React from 'react'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import Switch from '@mui/material/Switch'
 
 export default function Filters() {
 
     const [isCategoryListOpen, setIsCategoryListOpen] = React.useState(true)
+    const [requireRevisions, setRequireRevisions] = React.useState(false)
 
     function toggleCategoryList() {
         setIsCategoryListOpen((prev) => !prev)
@@ -15,12 +17,15 @@ export default function Filters() {
                 <h3>Фильтры</h3>
                 <div className="choose-category-block">
                     <p>Категория</p>
-                    <button className="open-categories-btn" onClick={toggleCategoryList}>
+                    <button
+                        className={`open-categories-btn ${isCategoryListOpen ? "rotated" : ""}`}
+                        onClick={toggleCategoryList}
+                    >
                         <KeyboardArrowDownIcon />
                     </button>
                 </div>
                 {isCategoryListOpen && (
-                    <ul className="category-list">
+                    <ul className={`category-list ${isCategoryListOpen ? "open" : ""}`}>
                         <li>
                             <input type="checkbox" name="category-1" id="category-1"/>
                             <label htmlFor="category-1">Авто</label>
@@ -38,8 +43,12 @@ export default function Filters() {
                 <hr />
                 
                 <div className="revisions-block">
-                    <label htmlFor="require-revisions">Только требующие доработок</label>
-                    <input type="checkbox" id="require-revisions"/>
+                    <p>Только требующие доработок</p>
+                    <Switch
+                        checked={requireRevisions}
+                        onChange={(e) => setRequireRevisions(e.target.checked)}
+                        color="default"
+                    />
                 </div>
             </div>
 
