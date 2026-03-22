@@ -1,3 +1,6 @@
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
+
 type PaginationProps = {
     currentPage: number
     totalItems: number
@@ -16,28 +19,29 @@ export default function Pagination({ currentPage,
   return (
     <div className="pagination">
       <button
+        className="pagination-btn"
         onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}>
-        Назад
+        disabled={currentPage === 1}
+      >
+        <KeyboardArrowLeftIcon />
       </button>
 
       {pages.map((page) => (
         <button
           key={page}
+          className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
           onClick={() => onPageChange(page)}
-          style={{
-            fontWeight: currentPage === page ? 'bold' : 'normal',
-            textDecoration: currentPage === page ? 'underline' : 'none'
-          }}
         >
           {page}
         </button>
       ))}
 
       <button
+        className="pagination-btn"
         onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}>
-        Вперёд
+        disabled={currentPage === totalPages}
+      >
+        <KeyboardArrowRightIcon />
       </button>
     </div>
   )

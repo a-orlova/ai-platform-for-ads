@@ -42,27 +42,29 @@ export default function AdsList() {
   return(
     <>
       <Header />
-      <div className="ads-page">
-        <Filters />
-        <div className="ads-list">
-          {ads.map((ad) => (
-            <Item
-              key={ad.id}
-              title={ad.title}
-              price={ad.price}
-              category={ad.category}
-              needsRevision={ad.needsRevision}
-            />
-          ))}
+      <div className="ads-page-wrapper">
+        <div className="ads-page">
+          <Filters />
+          <div className="ads-list">
+            {ads.map((ad) => (
+              <Item
+                key={ad.id}
+                title={ad.title}
+                price={ad.price}
+                category={ad.category}
+                needsRevision={ad.needsRevision}
+              />
+            ))}
+            <Pagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            onPageChange={(page) => setCurrentPage(page)}
+          />
+          </div>
         </div>
       </div>
-
-      <Pagination
-        currentPage={currentPage}
-        totalItems={totalItems}
-        itemsPerPage={itemsPerPage}
-        onPageChange={(page) => setCurrentPage(page)}
-      />
+      
     </>
   )
 }
