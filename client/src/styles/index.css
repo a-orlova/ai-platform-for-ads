@@ -9,12 +9,77 @@
     --border-color: #D9D9D9;
 }
 
-* {
+[data-theme="dark"] {
+    --bg-color: #1F1F23;
+    --elements-bg-color: #2A2A2E;
+    --main-text-color: #F1F1F1;
+    --reset-filters-btn-text-color: #A1A1A6;
+    --needs-revision-bg-color: #3A2F1F;
+    --revision-text-color: #FFB020;
+    --price-text-color: #B0B0B5;
+    --border-color: #3A3A3F;
+}
+
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
     font-family: 'Roboto', sans-serif;
     background-color: var(--bg-color);
     color: var(--main-text-color);
 }
 /* header */
+
+.change-theme-btn {
+    background-color: var(--elements-bg-color);
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    color: var(--main-text-color);
+}
+
+.grid-template-btn, .list-template-btn {
+    border: none;
+    background-color: var(--bg-color);
+    color: var(--main-text-color);
+    padding: 4px 6px;
+}
+
+.list-template-btn {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.grid-template-btn {
+    margin-right: 3px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.search-field-element {
+    flex: 1;
+    display: flex;
+    background-color: var(--bg-color);
+    border-radius: 8px;
+    padding: 6px;
+}
+
+.search-icon {
+    color: var(--main-text-color);
+    margin-left: 8px;
+}
+
+.search-field-element input {
+    flex: 1;
+    appearance: none;
+    border: none;
+    width: 100%;
+    border: none;         
+    outline: none;           
+    background-color: var(--bg-color);
+    padding: 0;               
+    box-shadow: none;  
+    border-radius: 8px;
+}
 
 .title-block {
     display: flex;
@@ -34,10 +99,38 @@
 }
 
 .functional-block {
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
+    gap: 24px;
+    padding: 12px 20px;
+    background-color: var(--elements-bg-color);
+}
+
+.select-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.sort-ads {
+    appearance: none;
+    border: none;
+    outline: none;
+    background-color: var(--bg-color);
+    color: var(--main-text-color);
+    padding: 8px 36px 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.select-icon {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--main-text-color);
 }
 
 /* filters */
@@ -107,7 +200,6 @@
 /* item card grid type*/
 
 .ad-item {
-    border: 1px solid red;
     width: 200px;
     height: auto;
     background-color: var(--elements-bg-color);

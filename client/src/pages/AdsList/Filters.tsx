@@ -1,8 +1,9 @@
 import React from 'react'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 
 export default function Filters() {
 
-    const [isCategoryListOpen, setIsCategoryListOpen] = React.useState(false)
+    const [isCategoryListOpen, setIsCategoryListOpen] = React.useState(true)
 
     function toggleCategoryList() {
         setIsCategoryListOpen((prev) => !prev)
@@ -15,7 +16,7 @@ export default function Filters() {
                 <div className="choose-category-block">
                     <p>Категория</p>
                     <button className="open-categories-btn" onClick={toggleCategoryList}>
-                        {isCategoryListOpen ? 'close' : 'open'}
+                        <KeyboardArrowDownIcon />
                     </button>
                 </div>
                 {isCategoryListOpen && (
