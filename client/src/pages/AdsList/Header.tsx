@@ -14,8 +14,10 @@ export default function Header() {
             <input type="search" placeholder="Найти объявление..."/>
             {/* иконка поиска */}
         </div>
-        <button className="grid-template">grid</button>
-        <button className="list-template">list</button>
+        <div className="change-layout-btn">
+          <button className="grid-template">grid</button>
+          <button className="list-template">list</button>
+        </div>
         <select name="" id="" className="sort-ads">
             <option value="">По новизне (сначала новые)</option>
             <option value="">По новизне (сначала старые)</option>
