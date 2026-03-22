@@ -3,6 +3,10 @@
     --elements-bg-color: #FFFFFF;
     --main-text-color: rgb(15%, 15%, 15%);
     --reset-filters-btn-text-color: #848388;
+    --needs-revision-bg-color: #F9F1E6;
+    --revision-text-color: #FAAD14 ;
+    --price-text-color: rgb(55%, 55%, 55%);
+    --border-color: #D9D9D9;
 }
 
 * {
@@ -98,4 +102,73 @@
     list-style: none;
     padding: 0;
     font-size: 14px;
+}
+
+/* item card grid type*/
+
+.ad-item {
+    border: 1px solid red;
+    width: 200px;
+    height: auto;
+    background-color: var(--elements-bg-color);
+    padding: 16px;
+    border-radius: 16px;
+}
+
+.ad-item h3, .price-txt{
+    font-size: 16px;
+    background-color: var(--elements-bg-color);
+}
+
+.category-txt, .need-revision {
+    font-size: 14px;
+}
+
+.category-txt {
+    display: inline-block;
+    border: 1px solid var(--border-color);
+    padding: 0 12px;
+    border-radius: 6px;
+    background-color: var(--elements-bg-color);
+    width: auto;
+}
+
+.ad-item h3 {
+    font-weight: normal;
+}
+
+.price-txt {
+    color: var(--price-text-color);
+    font-weight: bold;
+    background-color: var(--elements-bg-color);
+}
+
+.need-revision {
+    width: 155px;
+    background-color: var(--needs-revision-bg-color);
+    padding: 2px 8px;
+    border-radius: 8px;
+    color: var(--revision-text-color);
+    font-weight: bolder;
+}
+
+/* items grid */
+
+.ads-page {
+    display: flex; 
+    gap: 20px;
+    box-sizing: border-box;
+}
+
+.filters-block {
+    flex-shrink: 0;
+    width: 256px;
+}
+
+.ads-list {
+    margin-top: 16px;
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 50px;
 }
