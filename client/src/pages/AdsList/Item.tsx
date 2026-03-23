@@ -37,6 +37,15 @@ export default function Item({  id,
         setCurrentImageSrc(imageUrl || categoryPlaceholder)
     }, [imageUrl, categoryPlaceholder])
 
+    const categoryLabel =
+        category === 'electronics'
+            ? 'Электроника'
+            : category === 'real_estate'
+                ? 'Недвижимость'
+                : category === 'auto'
+                    ? 'Авто'
+                    : ''
+
 
     return (
         <div
@@ -54,12 +63,11 @@ export default function Item({  id,
                     }}
                 />
                 <p className={`category-txt`}>
-                {category === 'electronics' ? 'Электроника' : 
-                category === 'real_estate' ? 'Недвижимость' :
-                category === 'auto' ? 'Авто' : ''}
+                {categoryLabel}
                 </p>
             </div>
             <div className="ad-item-info">
+                {viewMode === 'list' && <p className="category-list-txt">{categoryLabel}</p>}
                 <h3>{title}</h3>
                 <p className="price-txt">{price} ₽</p>
                 {needsRevision && <p className="need-revision">• Требует доработок</p>}

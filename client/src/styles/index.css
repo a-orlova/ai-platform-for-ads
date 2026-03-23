@@ -424,12 +424,14 @@ li {
 }
 
 .ad-item-list .category-txt {
-    position: static;
-    transform: none;
-    margin: 6px 0 0 6px;
-    display: inline-flex;
+    display: none;
+}
+
+.category-list-txt {
+    margin: 0;
     font-size: 12px;
-    padding: 2px 8px;
+    color: var(--price-text-color);
+    font-weight: 500;
 }
 
 .pagination-btn {
