@@ -6,6 +6,17 @@ type GetAdsParams = {
   skip?: number
 }
 
+type ApiListItem = {
+  title: string
+  price: number
+  category: string
+  needsRevision: boolean
+  imageUrl?: string
+  image?: string
+  photoUrl?: string
+  photo?: string
+}
+
 export const getAds = async ({ limit, skip }: GetAdsParams = {}): Promise<{ items: Ad[]; total: number }> => {
   const params: any = {}
   if (limit !== undefined) params.limit = limit
@@ -16,8 +27,12 @@ export const getAds = async ({ limit, skip }: GetAdsParams = {}): Promise<{ item
 
   return {
     ...data,
-    items: data.items.map((item: Omit<Ad, "id">, index: number) => ({
-      ...item,
+    items: data.items.map((item: ApiListItem, index: number) => ({
+      title: item.title,
+      price: item.price,
+      category: item.category,
+      needsRevision: item.needsRevision,
+      imageUrl: item.imageUrl ?? item.image ?? item.photoUrl ?? item.photo,
       id: safeSkip + index + 1,
     })),
   }

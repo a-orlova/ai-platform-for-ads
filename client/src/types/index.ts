@@ -4,4 +4,5 @@ export type Ad = {
   price: number
   category: string
   needsRevision: boolean
+  imageUrl?: string
 }

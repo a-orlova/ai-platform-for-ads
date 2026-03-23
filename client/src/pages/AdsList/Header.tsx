@@ -7,7 +7,13 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 
 import React from 'react'
 
-export default function Header() {
+type HeaderProps = {
+  viewMode: 'grid' | 'list'
+  onViewModeChange: (mode: 'grid' | 'list') => void
+  totalItems: number
+}
+
+export default function Header({ viewMode, onViewModeChange, totalItems }: HeaderProps) {
 
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light')
 
@@ -31,7 +37,7 @@ export default function Header() {
       <div className="title-block">
         <div className="ads-title">
           <h1>Мои объявления</h1>
-          <h2><span>42</span> объявления</h2>
+          <h2><span>{totalItems}</span> объявления</h2>
         </div>
         <button className="change-theme-btn" onClick={toggleTheme}>
           {theme === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
@@ -44,8 +50,20 @@ export default function Header() {
             < SearchIcon />
         </div>
         <div className="change-layout-btn">
-          <button className="grid-template-btn"><GridViewIcon /></button>
-          <button className="list-template-btn"><FormatListBulletedIcon /></button>
+          <button
+            type="button"
+            className={`layout-btn grid-template-btn ${viewMode === 'grid' ? 'active' : ''}`}
+            onClick={() => onViewModeChange('grid')}
+          >
+            <GridViewIcon />
+          </button>
+          <button
+            type="button"
+            className={`layout-btn list-template-btn ${viewMode === 'list' ? 'active' : ''}`}
+            onClick={() => onViewModeChange('list')}
+          >
+            <FormatListBulletedIcon />
+          </button>
         </div>
         <div className="select-wrapper">
           <select className="sort-ads">

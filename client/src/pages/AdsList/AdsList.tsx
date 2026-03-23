@@ -15,6 +15,7 @@ export default function AdsList() {
   const [currentPage, setCurrentPage] = React.useState(1)
   const itemsPerPage = 10
   const [totalItems, setTotalItems] = React.useState(0)
+  const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid')
 
   React.useEffect(() => {
     const fetchAds = async () => {
@@ -41,27 +42,31 @@ export default function AdsList() {
 
   return(
     <>
-      <Header />
+      <Header viewMode={viewMode} onViewModeChange={setViewMode} totalItems={totalItems} />
       <div className="ads-page-wrapper">
         <div className="ads-page">
           <Filters />
-          <div className="ads-list">
-            {ads.map((ad) => (
-              <Item
-                key={ad.id}
-                id={ad.id}
-                title={ad.title}
-                price={ad.price}
-                category={ad.category}
-                needsRevision={ad.needsRevision}
-              />
-            ))}
+          <div className="ads-content">
+            <div className={`ads-grid ${viewMode === 'list' ? 'ads-list-view' : ''}`}>
+              {ads.map((ad) => (
+                <Item
+                  key={ad.id}
+                  id={ad.id}
+                  title={ad.title}
+                  price={ad.price}
+                  category={ad.category}
+                  needsRevision={ad.needsRevision}
+                  imageUrl={ad.imageUrl}
+                  viewMode={viewMode}
+                />
+              ))}
+            </div>
             <Pagination
-            currentPage={currentPage}
-            totalItems={totalItems}
-            itemsPerPage={itemsPerPage}
-            onPageChange={(page) => setCurrentPage(page)}
-          />
+              currentPage={currentPage}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
           </div>
         </div>
       </div>

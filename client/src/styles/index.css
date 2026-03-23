@@ -37,11 +37,26 @@ body {
     color: var(--main-text-color);
 }
 
-.grid-template-btn, .list-template-btn {
-    border: none;
+.change-layout-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px;
+    border-radius: 10px;
     background-color: var(--bg-color);
+    gap: 4px;
+}
+
+.layout-btn {
+    border: none;
+    background-color: transparent;
     color: var(--main-text-color);
-    padding: 4px 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.layout-btn.active {
+    background-color: var(--elements-bg-color);
 }
 
 .list-template-btn {
@@ -206,7 +221,7 @@ li {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin: 16px 20px;
+    margin: 0;
 }
 
 .filters-block h3 {
@@ -232,12 +247,14 @@ li {
 
 .ad-item {
     position: relative;
-    width: 200px;
     display: flex;
     flex-direction: column;
+    height: 100%;
+    min-height: 260px;
     border-radius: 16px;
     overflow: hidden;
     background-color: var(--elements-bg-color);
+    cursor: pointer;
 }
 
 .ad-item-photo {
@@ -253,21 +270,26 @@ li {
 }
 
 .ad-item-info {
-    padding: 12px;
+    padding: 16px 12px 12px;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex-grow: 1;
 }
 
 .ad-item-info h3 {
     font-size: 16px;
     font-weight: normal;
+    line-height: 1.35;
+    margin: 0;
+    min-height: 36px;
 }
 
 .price-txt {
     font-weight: bold;
     color: var(--price-text-color);
     margin: 0;
+    margin-top: auto;
 }
 
 .need-revision {
@@ -277,7 +299,7 @@ li {
     border-radius: 8px;
     color: var(--revision-text-color);
     font-weight: bolder;
-    margin-bottom: auto;
+    margin: 8px 0 0;
 }
 
 .category-txt {
@@ -301,6 +323,7 @@ li {
     display: flex; 
     gap: 20px;
     box-sizing: border-box;
+    padding: 16px 20px 24px;
 }
 
 .filters-block {
@@ -308,13 +331,24 @@ li {
     width: 256px;
 }
 
-.ads-list {
-    margin-right: 20px;
-    margin-top: 16px;
+.ads-content {
     flex-grow: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.ads-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 50px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    align-items: stretch;
+}
+
+.ads-grid.ads-list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 /* pagination */
@@ -323,7 +357,51 @@ li {
     align-items: center;
     justify-content: flex-start; 
     gap: 8px;
-    margin-top: 16px;
+    margin-top: 20px;
+}
+
+/* item card list type */
+.ad-item-list {
+    display: flex;
+    flex-direction: row;
+    min-height: 76px;
+}
+
+.ad-item-list .ad-item-photo {
+    width: 110px;
+    min-height: 76px;
+    height: auto;
+    flex-shrink: 0;
+}
+
+.ad-item-list .ad-item-info {
+    padding: 10px 12px;
+    gap: 2px;
+}
+
+.ad-item-list .ad-item-info h3 {
+    min-height: 0;
+    font-size: 14px;
+    line-height: 2;
+}
+
+.ad-item-list .price-txt {
+    margin-top: 2px;
+}
+
+.ad-item-list .need-revision {
+    margin-top: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.ad-item-list .category-txt {
+    position: static;
+    transform: none;
+    margin: 6px 0 0 6px;
+    display: inline-flex;
+    font-size: 12px;
+    padding: 2px 8px;
 }
 
 .pagination-btn {
