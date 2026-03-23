@@ -11,9 +11,21 @@ type HeaderProps = {
   viewMode: 'grid' | 'list'
   onViewModeChange: (mode: 'grid' | 'list') => void
   totalItems: number
+  searchQuery: string
+  onSearchQueryChange: (value: string) => void
+  sortValue: string
+  onSortChange: (value: string) => void
 }
 
-export default function Header({ viewMode, onViewModeChange, totalItems }: HeaderProps) {
+export default function Header({
+  viewMode,
+  onViewModeChange,
+  totalItems,
+  searchQuery,
+  onSearchQueryChange,
+  sortValue,
+  onSortChange,
+}: HeaderProps) {
 
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light')
 
@@ -46,7 +58,13 @@ export default function Header({ viewMode, onViewModeChange, totalItems }: Heade
 
       <div className="functional-block">
         <div className="search-field-element">
-            <input type="search" className="search-icon" placeholder="Найти объявление..."/>
+            <input
+              type="search"
+              className="search-icon"
+              placeholder="Найти объявление..."
+              value={searchQuery}
+              onChange={(e) => onSearchQueryChange(e.target.value)}
+            />
             < SearchIcon />
         </div>
         <div className="change-layout-btn">
@@ -66,13 +84,15 @@ export default function Header({ viewMode, onViewModeChange, totalItems }: Heade
           </button>
         </div>
         <div className="select-wrapper">
-          <select className="sort-ads">
-            <option value="">По новизне (сначала новые)</option>
-            <option value="">По новизне (сначала старые)</option>
-            <option value="">По цене (сначала новые)</option>
-            <option value="">По цене (сначала старые)</option>
-            <option value="">По названию (А-Я)</option>
-            <option value="">По названию (Я-А)</option>
+          <select
+            className="sort-ads"
+            value={sortValue}
+            onChange={(e) => onSortChange(e.target.value)}
+          >
+            <option value="createdAt_desc">По новизне (сначала новые)</option>
+            <option value="createdAt_asc">По новизне (сначала старые)</option>
+            <option value="title_asc">По названию (А-Я)</option>
+            <option value="title_desc">По названию (Я-А)</option>
           </select>
 
           <KeyboardArrowDownIcon className="select-icon" />

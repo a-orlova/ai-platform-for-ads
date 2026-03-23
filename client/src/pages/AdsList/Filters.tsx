@@ -2,13 +2,36 @@ import React from 'react'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import Switch from '@mui/material/Switch'
 
-export default function Filters() {
+type FiltersProps = {
+    selectedCategories: Array<'auto' | 'electronics' | 'real_estate'>
+    onCategoriesChange: (categories: Array<'auto' | 'electronics' | 'real_estate'>) => void
+    onlyNeedsRevision: boolean
+    onOnlyNeedsRevisionChange: (value: boolean) => void
+    onResetFilters: () => void
+}
+
+export default function Filters({
+    selectedCategories,
+    onCategoriesChange,
+    onlyNeedsRevision,
+    onOnlyNeedsRevisionChange,
+    onResetFilters,
+}: FiltersProps) {
 
     const [isCategoryListOpen, setIsCategoryListOpen] = React.useState(true)
-    const [requireRevisions, setRequireRevisions] = React.useState(false)
 
     function toggleCategoryList() {
         setIsCategoryListOpen((prev) => !prev)
+    }
+
+    function toggleCategory(category: 'auto' | 'electronics' | 'real_estate') {
+        const isSelected = selectedCategories.includes(category)
+        if (isSelected) {
+            onCategoriesChange(selectedCategories.filter((item) => item !== category))
+            return
+        }
+
+        onCategoriesChange([...selectedCategories, category])
     }
 
     return (
@@ -27,15 +50,33 @@ export default function Filters() {
                 {isCategoryListOpen && (
                     <ul className={`category-list ${isCategoryListOpen ? "open" : ""}`}>
                         <li>
-                            <input type="checkbox" name="category-1" id="category-1"/>
+                            <input
+                                type="checkbox"
+                                name="category-1"
+                                id="category-1"
+                                checked={selectedCategories.includes('auto')}
+                                onChange={() => toggleCategory('auto')}
+                            />
                             <label htmlFor="category-1">Авто</label>
                         </li>
                         <li>
-                            <input type="checkbox" name="category-2" id="category-2"/>
+                            <input
+                                type="checkbox"
+                                name="category-2"
+                                id="category-2"
+                                checked={selectedCategories.includes('electronics')}
+                                onChange={() => toggleCategory('electronics')}
+                            />
                             <label htmlFor="category-2">Электроника</label>
                         </li>
                         <li>
-                            <input type="checkbox" name="category-3" id="category-3"/>
+                            <input
+                                type="checkbox"
+                                name="category-3"
+                                id="category-3"
+                                checked={selectedCategories.includes('real_estate')}
+                                onChange={() => toggleCategory('real_estate')}
+                            />
                             <label htmlFor="category-3">Недвижимость</label>
                         </li>
                     </ul>)
@@ -45,14 +86,14 @@ export default function Filters() {
                 <div className="revisions-block">
                     <p>Только требующие доработок</p>
                     <Switch
-                        checked={requireRevisions}
-                        onChange={(e) => setRequireRevisions(e.target.checked)}
+                        checked={onlyNeedsRevision}
+                        onChange={(e) => onOnlyNeedsRevisionChange(e.target.checked)}
                         color="default"
                     />
                 </div>
             </div>
 
-            <button className="reset-filters-btn" type="button"> Сбросить фильтры </button>
+            <button className="reset-filters-btn" type="button" onClick={onResetFilters}> Сбросить фильтры </button>
         </aside>
     )
 }
