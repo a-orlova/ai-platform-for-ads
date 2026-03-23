@@ -49,6 +49,7 @@ export default function AdsList() {
             {ads.map((ad) => (
               <Item
                 key={ad.id}
+                id={ad.id}
                 title={ad.title}
                 price={ad.price}
                 category={ad.category}
