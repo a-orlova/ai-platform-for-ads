@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate, useParams, Link } from 'react-router-dom'
+import { useNavigate, useParams} from 'react-router-dom'
 import BorderColorIcon from '@mui/icons-material/BorderColor'
 import ErrorIcon from '@mui/icons-material/Error'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -170,28 +170,30 @@ export default function AdView() {
 
   return (
     <>
-      <header>
-        <div className="title-block">
-          <Link to="/ads">
-            <ArrowBackIcon />
-          </Link>
-          <h1>{ad.title}</h1>
-            <button onClick={() => navigate(`/ads/${id}/edit`)}>
-              Редактировать
-              <BorderColorIcon />
+      <div className="ad-view-header">
+        <div className="ad-view-title-block">
+          <div className="ad-view-title-row">
+            <button className="ad-view-back-btn" onClick={() => navigate('/ads')} aria-label="Назад к списку">
+              <ArrowBackIcon />
             </button>
+            <h2>{ad.title}</h2>
+          </div>
+          <button className="ad-view-edit-btn" onClick={() => navigate(`/ads/${id}/edit`)}>
+            Редактировать
+            <BorderColorIcon />
+          </button>
         </div>
-        <div className="price-block">
+        <div className="ad-view-price-block">
           <h2>{formatPrice(ad.price)}</h2>
           <p>Опубликовано {formatDateTime(ad.createdAt)}</p>
           {isEdited && <p>Отредактировано {formatDateTime(ad.updatedAt)}</p>}
         </div>
-      </header>
+      </div>
 
       <hr />
 
-      <main>
-        <div className="description-block">
+      <main className="ad-view-main">
+        <section className="ad-view-top-grid">
           <div className="ad-view-gallery">
             <div className="ad-view-main-image">
               <img
@@ -232,35 +234,49 @@ export default function AdView() {
               </div>
             )}
           </div>
-            <h3>Описание</h3>
-            <p>{ad.description || 'Отсутствует'}</p>
-        </div>
+          <div className="ad-view-side-panel">
+            {ad.needsRevision && (
+              <div className="alert-block">
+                <div className="alert-message">
+                  <ErrorIcon className="alert-icon"/>
+                  <div className="alert-content">
+                    <h4>Требуются доработки</h4>
+                    <p>У объявления не заполнены поля:</p>
+                    <ul>
+                      {ad.missingFields.map((field) => (
+                        <li key={field}>{field}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
 
-        {ad.needsRevision && (
-          <div className="alert-block">
-            <ErrorIcon />
-            <h4>Требуются доработки</h4>
-            <p>У объявления не заполнены поля:</p>
-            <ul>
-              {ad.missingFields.map((field) => (
-                <li key={field}>{field}</li>
-              ))}
-            </ul>
+            <div className="features-block">
+              <h3>Характеристики</h3>
+              {features.length > 0 ? (
+                <ul>
+                  <li>
+                    <span className="feature-label">Категория</span>
+                    <span className="feature-value">{categoryLabels[ad.category]}</span>
+                  </li>
+                  {features.map((feature) => (
+                    <li key={feature.label}>
+                      <span className="feature-label">{feature.label}</span>
+                      <span className="feature-value">{feature.value}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>Характеристики не заполнены</p>
+              )}
+            </div>
           </div>
-        )}
+        </section>
 
-        <div className="features-block">
-          <h3>Характеристики</h3>
-          <p>Категория: {categoryLabels[ad.category]}</p>
-          {features.length > 0 ? (
-            <ul>
-              {features.map((feature) => (
-                <li key={feature.label}>{feature.label}: {feature.value}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>Характеристики не заполнены</p>
-          )}
+        <div className="ad-view-description-block">
+          <h3>Описание</h3>
+          <p>{ad.description || 'Отсутствует'}</p>
         </div>
       </main>
     </>
