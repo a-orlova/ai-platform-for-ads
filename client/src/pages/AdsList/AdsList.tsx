@@ -1,54 +1,14 @@
-import Header from './Header'
-import Filters from './Filters'
-import Item from './Item'
-import Pagination from './Pagination'
+import Header from './components/Header'
+import Filters from './components/Filters'
+import Item from './components/Item'
+import Pagination from './components/Pagination'
 import { getAds } from '../../api/getAds'
+import { ADS_LIST_STATE_STORAGE_KEY, readAdsListStoredState } from '../../helpers/adsListState'
 import type { Ad, Category, SortColumn, SortDirection, AdsListStoredState, ViewMode } from '../../types'
 import React from 'react'
 
-const ADS_LIST_STATE_STORAGE_KEY = 'ads-list-state'
-
-const defaultStoredState: AdsListStoredState = {
-  searchQuery: '',
-  currentPage: 1,
-  viewMode: 'grid',
-  selectedCategories: [],
-  onlyNeedsRevision: false,
-  sortColumn: 'createdAt',
-  sortDirection: 'desc',
-}
-
-const isCategory = (value: unknown): value is Category =>
-  value === 'auto' || value === 'electronics' || value === 'real_estate'
-
-const readStoredState = (): AdsListStoredState => {
-  try {
-    const rawState = localStorage.getItem(ADS_LIST_STATE_STORAGE_KEY)
-    if (!rawState) return defaultStoredState
-
-    const parsed = JSON.parse(rawState) as Partial<AdsListStoredState>
-
-    return {
-      searchQuery: typeof parsed.searchQuery === 'string' ? parsed.searchQuery : '',
-      currentPage:
-        typeof parsed.currentPage === 'number' && parsed.currentPage > 0
-          ? parsed.currentPage
-          : 1,
-      viewMode: parsed.viewMode === 'list' ? 'list' : 'grid',
-      selectedCategories: Array.isArray(parsed.selectedCategories)
-        ? parsed.selectedCategories.filter(isCategory)
-        : [],
-      onlyNeedsRevision: Boolean(parsed.onlyNeedsRevision),
-      sortColumn: parsed.sortColumn === 'title' ? 'title' : 'createdAt',
-      sortDirection: parsed.sortDirection === 'asc' ? 'asc' : 'desc',
-    }
-  } catch {
-    return defaultStoredState
-  }
-}
-
 export default function AdsList() {
-  const initialState = React.useMemo(readStoredState, [])
+  const initialState = React.useMemo(readAdsListStoredState, [])
 
   const [ads, setAds] = React.useState<Ad[]>([])
   const [isInitialLoading, setIsInitialLoading] = React.useState(true)

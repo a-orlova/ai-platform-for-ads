@@ -1,121 +1,7 @@
 import { api } from "./axios"
 import type { Ad, GetAdsParams, ApiListItem, ApiItemDetails, AdDetails } from "../types"
-
-const isNonEmptyString = (value: unknown): value is string =>
-  typeof value === 'string' && value.trim().length > 0
-
-const isPositiveNumber = (value: unknown): value is number =>
-  typeof value === 'number' && Number.isFinite(value) && value > 0
-
-const getMissingFields = (item: ApiItemDetails): string[] => {
-  const missingFields: string[] = []
-  const params = item.params ?? {}
-
-  if (!isNonEmptyString(item.description)) {
-    missingFields.push('Описание')
-  }
-
-  if (item.category === 'auto') {
-    if (!isNonEmptyString(params.brand)) missingFields.push('Марка')
-    if (!isNonEmptyString(params.model)) missingFields.push('Модель')
-    if (!isPositiveNumber(params.yearOfManufacture)) missingFields.push('Год выпуска')
-    if (!(params.transmission === 'automatic' || params.transmission === 'manual')) {
-      missingFields.push('Коробка передач')
-    }
-    if (!isPositiveNumber(params.mileage)) missingFields.push('Пробег')
-    if (!isPositiveNumber(params.enginePower)) missingFields.push('Мощность двигателя')
-    return missingFields
-  }
-
-  if (item.category === 'real_estate') {
-    if (!(params.type === 'flat' || params.type === 'house' || params.type === 'room')) {
-      missingFields.push('Тип недвижимости')
-    }
-    if (!isNonEmptyString(params.address)) missingFields.push('Адрес')
-    if (!isPositiveNumber(params.area)) missingFields.push('Площадь')
-    if (!isPositiveNumber(params.floor)) missingFields.push('Этаж')
-    return missingFields
-  }
-
-  if (!(params.type === 'phone' || params.type === 'laptop' || params.type === 'misc')) {
-    missingFields.push('Тип устройства')
-  }
-  if (!isNonEmptyString(params.brand)) missingFields.push('Бренд')
-  if (!isNonEmptyString(params.model)) missingFields.push('Модель')
-  if (!(params.condition === 'new' || params.condition === 'used')) {
-    missingFields.push('Состояние')
-  }
-  if (!isNonEmptyString(params.color)) missingFields.push('Цвет')
-  return missingFields
-}
-
-const getFallbackTitle = (id: number) => `Объявление #${id}`
-
-const getListItemSignature = (item: Pick<ApiListItem, 'category' | 'title' | 'price'>) =>
-  `${item.category}::${item.title.trim()}::${item.price}`
-
-let idLookupPromise: Promise<Map<string, number[]>> | null = null
-
-const buildIdLookup = async (): Promise<Map<string, number[]>> => {
-  const { data } = await api.get<{ total: number }>('/items', {
-    params: { limit: 1, skip: 0 },
-  })
-
-  const total = typeof data.total === 'number' && data.total > 0 ? data.total : 0
-  const detailsResults = await Promise.all(
-    Array.from({ length: total }, (_, index) =>
-      api.get<ApiItemDetails>(`/items/${index + 1}`).then((res) => ({ id: index + 1, data: res.data })).catch(() => null),
-    ),
-  )
-
-  const lookup = new Map<string, number[]>()
-
-  for (const result of detailsResults) {
-    if (!result) continue
-
-    const signature = getListItemSignature({
-      category: result.data.category,
-      title: result.data.title ?? getFallbackTitle(result.id),
-      price: typeof result.data.price === 'number' ? result.data.price : 0,
-    })
-
-    const currentIds = lookup.get(signature) ?? []
-    currentIds.push(result.id)
-    lookup.set(signature, currentIds)
-  }
-
-  return lookup
-}
-
-const getIdLookup = async () => {
-  if (!idLookupPromise) {
-    idLookupPromise = buildIdLookup().catch((error) => {
-      idLookupPromise = null
-      throw error
-    })
-  }
-
-  return idLookupPromise
-}
-
-const pickImageUrls = (item: ApiItemDetails): string[] => {
-  const candidates = [
-    ...(Array.isArray(item.imageUrls) ? item.imageUrls : []),
-    ...(Array.isArray(item.images) ? item.images : []),
-    ...(Array.isArray(item.photoUrls) ? item.photoUrls : []),
-    ...(Array.isArray(item.photos) ? item.photos : []),
-    item.imageUrl,
-    item.image,
-    item.photoUrl,
-    item.photo,
-  ]
-
-  return Array.from(
-    new Set(
-      candidates.filter((value): value is string => typeof value === 'string' && value.trim().length > 0),
-    ),
-  )
-}
+import { getMissingFields } from "../helpers/adValidators"
+import { getFallbackTitle, pickImageUrls } from "../helpers/adMappers"
 
 export const getAds = async ({limit,
                               skip,
@@ -135,48 +21,26 @@ export const getAds = async ({limit,
   if (sortDirection) params.sortDirection = sortDirection
 
   const { data } = await api.get("/items", { params })
-  const safeSkip = skip ?? 0
-  const usedIds = new Set<number>()
-  const idLookup = await getIdLookup()
 
   return {
     ...data,
-    items: await Promise.all(
-      data.items.map(async (item: ApiListItem, index: number) => {
-        const itemSignature = getListItemSignature(item)
-        const signatureIds = idLookup.get(itemSignature) ?? []
-        const resolvedId = signatureIds.find((candidateId) => !usedIds.has(candidateId))
-        const id =
-          (typeof item.id === 'number' && Number.isInteger(item.id) && item.id > 0
-            ? item.id
-            : resolvedId) ?? safeSkip + index + 1
-        usedIds.add(id)
+    items: data.items.map((item: ApiListItem, index: number) => {
+      const id = item.id
 
-        try {
-          const { data: details } = await api.get<ApiItemDetails>(`/items/${id}`)
-          const missingFields = getMissingFields(details)
-          return {
-            title: item.title,
-            price: item.price,
-            category: item.category,
-            needsRevision: missingFields.length > 0,
-            missingFields,
-            imageUrl: item.imageUrl ?? item.image ?? item.photoUrl ?? item.photo,
-            id,
-          }
-        } catch {
-          return {
-            title: item.title,
-            price: item.price,
-            category: item.category,
-            needsRevision: item.needsRevision,
-            missingFields: item.needsRevision ? ['Не удалось получить детали объявления'] : [],
-            imageUrl: item.imageUrl ?? item.image ?? item.photoUrl ?? item.photo,
-            id,
-          }
-        }
-      }),
-    ),
+      if (typeof id !== 'number' || !Number.isInteger(id) || id <= 0) {
+        throw new Error(`Сервер вернул объявление без корректного id на позиции ${index}`)
+      }
+
+      return {
+        title: item.title,
+        price: item.price,
+        category: item.category,
+        needsRevision: item.needsRevision,
+        missingFields: [],
+        imageUrl: item.imageUrl ?? item.image ?? item.photoUrl ?? item.photo,
+        id,
+      }
+    }),
   }
 }
 

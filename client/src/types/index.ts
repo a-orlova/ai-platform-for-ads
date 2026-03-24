@@ -24,7 +24,7 @@ export type GetAdsParams = {
 }
 
 export type ApiListItem = {
-  id?: number
+  id: number
   title: string
   price: number
   category: Category
