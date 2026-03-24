@@ -78,3 +78,37 @@ export type AdsListStoredState = {
   sortColumn: SortColumn
   sortDirection: SortDirection
 }
+
+export type AutoParamsForm = {
+  brand: string
+  model: string
+  yearOfManufacture: string
+  transmission: '' | 'automatic' | 'manual'
+  mileage: string
+  enginePower: string
+}
+
+export type RealEstateParamsForm = {
+  type: '' | 'flat' | 'house' | 'room'
+  address: string
+  area: string
+  floor: string
+}
+
+export type ElectronicsParamsForm = {
+  type: '' | 'phone' | 'laptop' | 'misc'
+  brand: string
+  model: string
+  condition: '' | 'new' | 'used'
+  color: string
+}
+
+export type AdEditFormState = {
+  category: Category
+  title: string
+  price: string
+  description: string
+  autoParams: AutoParamsForm
+  realEstateParams: RealEstateParamsForm
+  electronicsParams: ElectronicsParamsForm
+}
