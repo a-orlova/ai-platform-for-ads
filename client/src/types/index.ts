@@ -1,6 +1,7 @@
 export type Category = 'auto' | 'electronics' | 'real_estate'
 export type SortColumn = 'title' | 'createdAt'
 export type SortDirection = 'asc' | 'desc'
+export type ViewMode = 'grid' | 'list'
 
 export type Ad = {
   id: number
@@ -23,6 +24,7 @@ export type GetAdsParams = {
 }
 
 export type ApiListItem = {
+  id?: number
   title: string
   price: number
   category: Category
@@ -34,15 +36,43 @@ export type ApiListItem = {
 }
 
 export type ApiItemDetails = {
+  id?: number
+  title?: string
+  price?: number | null
+  createdAt?: string
+  updatedAt?: string
   category: Category
   description?: string
   params?: Record<string, unknown>
+  imageUrl?: string
+  image?: string
+  photoUrl?: string
+  photo?: string
+  images?: string[]
+  photos?: string[]
+  imageUrls?: string[]
+  photoUrls?: string[]
+}
+
+export type AdDetails = {
+  id: number
+  title: string
+  description: string
+  price: number | null
+  createdAt: string
+  updatedAt: string
+  category: Category
+  params: Record<string, unknown>
+  needsRevision: boolean
+  missingFields: string[]
+  imageUrl?: string
+  imageUrls: string[]
 }
 
 export type AdsListStoredState = {
   searchQuery: string
   currentPage: number
-  viewMode: 'grid' | 'list'
+  viewMode: ViewMode
   selectedCategories: Category[]
   onlyNeedsRevision: boolean
   sortColumn: SortColumn

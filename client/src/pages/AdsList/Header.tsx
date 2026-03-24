@@ -6,10 +6,11 @@ import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 
 import React from 'react'
+import type { ViewMode } from '../../types'
 
 type HeaderProps = {
-  viewMode: 'grid' | 'list'
-  onViewModeChange: (mode: 'grid' | 'list') => void
+  viewMode: ViewMode
+  onViewModeChange: (mode: ViewMode) => void
   totalItems: number
   searchQuery: string
   onSearchQueryChange: (value: string) => void

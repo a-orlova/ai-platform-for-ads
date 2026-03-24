@@ -3,7 +3,7 @@ import Filters from './Filters'
 import Item from './Item'
 import Pagination from './Pagination'
 import { getAds } from '../../api/getAds'
-import type { Ad, Category, SortColumn, SortDirection, AdsListStoredState } from '../../types'
+import type { Ad, Category, SortColumn, SortDirection, AdsListStoredState, ViewMode } from '../../types'
 import React from 'react'
 
 const ADS_LIST_STATE_STORAGE_KEY = 'ads-list-state'
@@ -58,7 +58,7 @@ export default function AdsList() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = React.useState(initialState.searchQuery.trim())
   const [currentPage, setCurrentPage] = React.useState(initialState.currentPage)
   const [totalItems, setTotalItems] = React.useState(0)
-  const [viewMode, setViewMode] = React.useState<'grid' | 'list'>(initialState.viewMode)
+  const [viewMode, setViewMode] = React.useState<ViewMode>(initialState.viewMode)
   const [selectedCategories, setSelectedCategories] = React.useState<Category[]>(initialState.selectedCategories)
   const [onlyNeedsRevision, setOnlyNeedsRevision] = React.useState(initialState.onlyNeedsRevision)
   const [sortColumn, setSortColumn] = React.useState<SortColumn>(initialState.sortColumn)

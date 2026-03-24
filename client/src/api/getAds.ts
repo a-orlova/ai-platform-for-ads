@@ -1,5 +1,5 @@
 import { api } from "./axios"
-import type { Ad, GetAdsParams, ApiListItem, ApiItemDetails } from "../types"
+import type { Ad, GetAdsParams, ApiListItem, ApiItemDetails, AdDetails } from "../types"
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0
@@ -49,6 +49,74 @@ const getMissingFields = (item: ApiItemDetails): string[] => {
   return missingFields
 }
 
+const getFallbackTitle = (id: number) => `Объявление #${id}`
+
+const getListItemSignature = (item: Pick<ApiListItem, 'category' | 'title' | 'price'>) =>
+  `${item.category}::${item.title.trim()}::${item.price}`
+
+let idLookupPromise: Promise<Map<string, number[]>> | null = null
+
+const buildIdLookup = async (): Promise<Map<string, number[]>> => {
+  const { data } = await api.get<{ total: number }>('/items', {
+    params: { limit: 1, skip: 0 },
+  })
+
+  const total = typeof data.total === 'number' && data.total > 0 ? data.total : 0
+  const detailsResults = await Promise.all(
+    Array.from({ length: total }, (_, index) =>
+      api.get<ApiItemDetails>(`/items/${index + 1}`).then((res) => ({ id: index + 1, data: res.data })).catch(() => null),
+    ),
+  )
+
+  const lookup = new Map<string, number[]>()
+
+  for (const result of detailsResults) {
+    if (!result) continue
+
+    const signature = getListItemSignature({
+      category: result.data.category,
+      title: result.data.title ?? getFallbackTitle(result.id),
+      price: typeof result.data.price === 'number' ? result.data.price : 0,
+    })
+
+    const currentIds = lookup.get(signature) ?? []
+    currentIds.push(result.id)
+    lookup.set(signature, currentIds)
+  }
+
+  return lookup
+}
+
+const getIdLookup = async () => {
+  if (!idLookupPromise) {
+    idLookupPromise = buildIdLookup().catch((error) => {
+      idLookupPromise = null
+      throw error
+    })
+  }
+
+  return idLookupPromise
+}
+
+const pickImageUrls = (item: ApiItemDetails): string[] => {
+  const candidates = [
+    ...(Array.isArray(item.imageUrls) ? item.imageUrls : []),
+    ...(Array.isArray(item.images) ? item.images : []),
+    ...(Array.isArray(item.photoUrls) ? item.photoUrls : []),
+    ...(Array.isArray(item.photos) ? item.photos : []),
+    item.imageUrl,
+    item.image,
+    item.photoUrl,
+    item.photo,
+  ]
+
+  return Array.from(
+    new Set(
+      candidates.filter((value): value is string => typeof value === 'string' && value.trim().length > 0),
+    ),
+  )
+}
+
 export const getAds = async ({limit,
                               skip,
                               q,
@@ -68,12 +136,21 @@ export const getAds = async ({limit,
 
   const { data } = await api.get("/items", { params })
   const safeSkip = skip ?? 0
+  const usedIds = new Set<number>()
+  const idLookup = await getIdLookup()
 
   return {
     ...data,
     items: await Promise.all(
       data.items.map(async (item: ApiListItem, index: number) => {
-        const id = safeSkip + index + 1
+        const itemSignature = getListItemSignature(item)
+        const signatureIds = idLookup.get(itemSignature) ?? []
+        const resolvedId = signatureIds.find((candidateId) => !usedIds.has(candidateId))
+        const id =
+          (typeof item.id === 'number' && Number.isInteger(item.id) && item.id > 0
+            ? item.id
+            : resolvedId) ?? safeSkip + index + 1
+        usedIds.add(id)
 
         try {
           const { data: details } = await api.get<ApiItemDetails>(`/items/${id}`)
@@ -100,5 +177,26 @@ export const getAds = async ({limit,
         }
       }),
     ),
+  }
+}
+
+export const getAdById = async (id: number): Promise<AdDetails> => {
+  const { data } = await api.get<ApiItemDetails>(`/items/${id}`)
+  const missingFields = getMissingFields(data)
+  const imageUrls = pickImageUrls(data)
+
+  return {
+    id: data.id ?? id,
+    title: data.title?.trim() || getFallbackTitle(id),
+    description: data.description?.trim() || '',
+    price: typeof data.price === 'number' ? data.price : null,
+    createdAt: data.createdAt ?? '',
+    updatedAt: data.updatedAt ?? '',
+    category: data.category,
+    params: data.params ?? {},
+    needsRevision: missingFields.length > 0,
+    missingFields,
+    imageUrl: imageUrls[0],
+    imageUrls,
   }
 }

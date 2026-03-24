@@ -3,6 +3,7 @@ import AutoPlaceholder from '../../assets/images/shape.svg'
 import ElectronicsPlaceholder from '../../assets/images/product.svg'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import type { ViewMode } from '../../types'
 
 type ItemProps = {
     id: number,
@@ -11,7 +12,7 @@ type ItemProps = {
     category: string,
     needsRevision: boolean,
     imageUrl?: string,
-    viewMode: 'grid' | 'list'
+    viewMode: ViewMode
 }
 
 export default function Item({  id,

@@ -466,3 +466,56 @@ li {
     opacity: 0.5;
     cursor: default;
 }
+
+.ad-view-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ad-view-main-image {
+    width: 100%;
+    max-width: 680px;
+    min-height: 320px;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: var(--elements-bg-color);
+}
+
+.ad-view-main-image img {
+    width: 100%;
+    height: 100%;
+    min-height: 320px;
+    object-fit: cover;
+    display: block;
+}
+
+.ad-view-thumbnails {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.ad-view-thumbnail {
+    border: 1px solid var(--border-color);
+    background: transparent;
+    border-radius: 8px;
+    width: 92px;
+    height: 68px;
+    flex: 0 0 auto;
+    overflow: hidden;
+    padding: 0;
+    cursor: pointer;
+}
+
+.ad-view-thumbnail.active {
+    border-color: var(--revision-text-color);
+}
+
+.ad-view-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
