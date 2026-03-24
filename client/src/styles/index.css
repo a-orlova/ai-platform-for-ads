@@ -14,6 +14,10 @@
         0px 6px 16px 0px rgba(0, 0, 0, 0.08),
         0px 9px 28px 8px rgba(0, 0, 0, 0.05);
     --hr-color: #dfdfdf;
+    --tooltip-bg-color: #FEE9E7;
+    --tooltip-close-btn-color: #FCB3AD;
+    --tooltip-btn-border-color: #D9D9D9;
+    --red-tooltip-color: #C00F0C;
 }
 
 [data-theme="dark"] {
@@ -724,4 +728,303 @@ hr {
     border: none;
     border-top: 1px solid var(--hr-color);
     margin: 0;
+}
+
+/* ai question btn */
+
+.ai-question-btn {
+    background-color: var(--needs-revision-bg-color);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--revision-text-color);
+    box-shadow: var(--shadow-alert);
+}
+
+.ai-question-btn:disabled {
+    opacity: 0.85;
+    cursor: default;
+}
+
+.ai-question-btn-loading-icon {
+    animation: ai-btn-spin 1s linear infinite;
+}
+
+@keyframes ai-btn-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ai-fail-tooltip */
+
+.ai-fail-tooltip {
+    background-color: var(--tooltip-bg-color);
+    box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.15);
+    padding: 8px;
+    max-width: 332px;
+}
+
+.ai-fail-tooltip-close-btn {
+    background-color: var(--tooltip-close-btn-color);
+    border: 1px solid var(--tooltip-btn-border-color);
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.ai-fail-tooltip h5 {
+    color: var(--red-tooltip-color);
+    margin: 0;
+    margin-bottom: 8px;
+}
+
+.ai-fail-tooltip p {
+    margin: 0;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+/* ad-edit page */
+
+.ad-edit-page {
+    padding: 24px 20px 40px;
+    max-width: 720px;
+}
+
+.ad-edit-title {
+    font-size: 30px;
+    font-weight: 600;
+    margin: 0 0 24px;
+    line-height: 1.2;
+}
+
+.ad-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ad-edit-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 8px 0 0;
+}
+
+.ad-edit-label {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+.ad-edit-required {
+    color: #ff4d4f;
+    font-weight: 600;
+}
+
+.ad-edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.ad-edit-control,
+.ad-edit-input-row .ad-edit-control {
+    font-size: 14px;
+    line-height: 1.4;
+    border-radius: 8px;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    width: 100%;
+    background-color: var(--elements-bg-color);
+    color: var(--main-text-color);
+    outline: none;
+}
+
+.ad-edit-control--filled {
+    border: 1px solid #d9d9d9;
+}
+
+.ad-edit-control--optional-empty {
+    border: 1px solid #ffa940;
+}
+
+.ad-edit-control--error {
+    border: 1px solid #ff4d4f;
+}
+
+/* Селекты: своя стрелка, отступ слева и справа от края до текста / до иконки согласован */
+.ad-edit-page select.ad-edit-control {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23848388' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px 16px;
+    padding: 8px 12px;
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+[data-theme="dark"] .ad-edit-page select.ad-edit-control {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23A1A1A6' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+}
+
+.ad-edit-field-error {
+    font-size: 12px;
+    color: #ff4d4f;
+    margin: 6px 0 0;
+}
+
+.ad-edit-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.ad-edit-input-row--grow {
+    flex: 1;
+    min-width: 0;
+}
+
+.ad-edit-input-row .ad-edit-control {
+    flex: 1;
+    min-width: 0;
+}
+
+.ad-edit-clear {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--elements-bg-color);
+    color: var(--main-text-color);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.ad-edit-clear:hover {
+    background-color: var(--bg-color);
+}
+
+.ad-edit-textarea-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.ad-edit-textarea-wrap textarea {
+    font-size: 14px;
+    line-height: 1.4;
+    border-radius: 8px;
+    padding: 8px 36px 8px 10px;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    background-color: var(--elements-bg-color);
+    color: var(--main-text-color);
+    outline: none;
+}
+
+.ad-edit-textarea-wrap textarea.ad-edit-control--filled {
+    border: 1px solid #d9d9d9;
+}
+
+.ad-edit-textarea-wrap textarea.ad-edit-control--optional-empty {
+    border: 1px solid #ffa940;
+}
+
+.ad-edit-clear--textarea {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
+.ad-edit-counter {
+    font-size: 12px;
+    color: var(--price-text-color);
+    margin: 6px 0 8px;
+}
+
+.ad-edit-description-ai-row {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: fit-content;
+    max-width: 100%;
+}
+
+.ad-edit-description-ai-row .ai-question-btn {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 100%;
+}
+
+.ad-edit-price-row {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ad-edit-price-row .ad-edit-input-row {
+    align-items: center;
+}
+
+.ad-edit-price-row input[type="number"].ad-edit-control {
+    min-height: 38px;
+    box-sizing: border-box;
+}
+
+.ad-edit-price-row .ai-question-btn {
+    align-self: stretch;
+    box-sizing: border-box;
+    min-height: 38px;
+}
+
+.ad-edit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.ad-edit-save {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background-color: var(--edit-btn-color);
+    color: var(--elements-bg-color);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.ad-edit-save:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.ad-edit-cancel {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--elements-bg-color);
+    color: var(--main-text-color);
+    font-size: 14px;
+    cursor: pointer;
 }
