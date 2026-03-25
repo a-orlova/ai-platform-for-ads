@@ -6,18 +6,19 @@ import React from 'react'
 type AiRequestState = 'idle' | 'loading' | 'completed'
 type AiQuestionBtnMode = 'description' | 'price'
 
-type AiDescriptionBtnProps = {
+type AiQuestionBtnProps = {
   mode: AiQuestionBtnMode
   descriptionValue?: string
   state?: AiRequestState
   onClick?: () => void | Promise<void>
 }
 
-export default function AiDescriptionBtn({ mode,
-                                           descriptionValue = '',
-                                           state,
-                                           onClick,
-                                        }: AiDescriptionBtnProps) {
+export default function AiQuestionBtn({ mode,
+                                        descriptionValue = '',
+                                        state,
+                                        onClick,
+                                        }: AiQuestionBtnProps) {
+  
   const [internalState, setInternalState] = React.useState<AiRequestState>('idle')
   const currentState = state ?? internalState
 

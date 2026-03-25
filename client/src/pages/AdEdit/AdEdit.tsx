@@ -6,7 +6,10 @@ import { requiredFieldMessage } from '../../helpers/adEditMessages'
 import { canSaveAdEdit, isPriceFilled, isTypeFilled } from '../../helpers/adEditValidation'
 import type { AdEditFormState, Category } from '../../types'
 import AdEditParamsFields from './components/AdEditParamsFields'
-import AiQuestionBtn from './components/AiQuestionBtn'
+import AiQuestionBtn from './components/AiQuestionBtn.tsx'
+import { generateOllama } from '../../api/ollamaClient'
+import AiTooltip, { type AiTooltipVariant } from './components/AiTooltip'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 const DESCRIPTION_LIMIT = 1000
 
@@ -33,6 +36,18 @@ export default function AdEdit() {
     price: false,
     type: false,
   })
+
+  const [priceAiTooltip, setPriceAiTooltip] = React.useState<{
+    isOpen: boolean
+    variant: AiTooltipVariant
+    text: string
+  }>({ isOpen: false, variant: 'normal', text: '' })
+
+  const [descriptionAiTooltip, setDescriptionAiTooltip] = React.useState<{
+    isOpen: boolean
+    variant: AiTooltipVariant
+    text: string
+  }>({ isOpen: false, variant: 'normal', text: '' })
 
   const showTitleError = touched.title && !form.title.trim()
   const showPriceError = touched.price && !isPriceFilled(form.price)
@@ -80,7 +95,19 @@ export default function AdEdit() {
 
   return (
     <main className="ad-edit-page">
-      <h1 className="ad-edit-title">Редактирование объявления</h1>
+      <div className="ad-edit-title-row">
+        <button
+          className="ad-view-back-btn"
+          onClick={() => {
+            if (id) navigate(`/ads/${id}`)
+            else navigate('/ads')
+          }}
+          aria-label="Назад к объявлению"
+        >
+          <ArrowBackIcon />
+        </button>
+        <h1 className="ad-edit-title">Редактирование объявления</h1>
+      </div>
 
       <form
         className="ad-edit-form"
@@ -163,7 +190,42 @@ export default function AdEdit() {
                 </button>
               ) : null}
             </div>
-            <AiQuestionBtn mode="price" />
+            <div className="ai-tooltip-anchor">
+              <AiQuestionBtn
+                mode="price"
+                onClick={async () => {
+                  const prompt =
+                    'Оцени рыночную цену объявления на Авито с характеристиками ниже.\n' +
+                    'Ответь сжатым текстом на 3-5 строк на русском языке, какую цену можно установить, опираясь на характеристики товара.\n\n' +
+                    `Категория: ${form.category}\n` +
+                    `Название: ${form.title || '(нет)'}\n` +
+                    `Описание: ${form.description || '(нет)'}\n` +
+                    `Характеристики: ${JSON.stringify(form, null, 2)}\n` +
+                    `Текущая цена: ${form.price || '(нет)'}\n`
+
+                  try {
+                    const result = await generateOllama({ prompt, model: 'llama3' })
+
+                    const responseText =
+                      typeof result.response === 'string' ? result.response : JSON.stringify(result.response ?? result)
+
+                    setPriceAiTooltip({ isOpen: true, variant: 'normal', text: responseText })
+                  } catch (e) {
+                    const message = e instanceof Error ? e.message : String(e)
+                    setPriceAiTooltip({ isOpen: true, variant: 'error', text: message })
+                  }
+                }}
+              />
+
+              {priceAiTooltip.isOpen ? (
+                <AiTooltip
+                  variant={priceAiTooltip.variant}
+                  text={priceAiTooltip.text}
+                  onClose={() => setPriceAiTooltip((prev) => ({ ...prev, isOpen: false }))}
+                  showAttachButton={false}
+                />
+              ) : null}
+            </div>
           </div>
           {showPriceError ? (
             <p className="ad-edit-field-error">{requiredFieldMessage('Цена')}</p>
@@ -207,7 +269,53 @@ export default function AdEdit() {
             Символы: {form.description.length} / {DESCRIPTION_LIMIT}
           </p>
           <div className="ad-edit-description-ai-row">
-            <AiQuestionBtn mode="description" descriptionValue={form.description} />
+            <div className="ai-tooltip-anchor">
+              <AiQuestionBtn
+                mode="description"
+                descriptionValue={form.description}
+                onClick={async () => {
+                  const prompt = form.description.trim()
+                    ? 'Улучши описание объявления на Авито. Сохрани смысл, сделай текст более привлекательным и "продаваемым" на русском языке строго до 1000 символов.\n\n' +
+                      `Категория: ${form.category}\n` +
+                      `Название: ${form.title || '(нет)'}\n` +
+                      `Характеристики: ${JSON.stringify(form, null, 2)}\n` +
+                      `Текущее описание:\n${form.description}\n`
+                    : 'Придумай качественное описание объявления на Авито. Сохрани смысл, ориентируйся на данные ниже, сделай текст более привлекательным и "продаваемым" на русском языке строго до 1000 символов.\n\n' +
+                      `Категория: ${form.category}\n` +
+                      `Название: ${form.title || '(нет)'}\n` +
+                      `Характеристики: ${JSON.stringify(form, null, 2)}\n`
+
+                  try {
+                    const result = await generateOllama({ prompt, model: 'llama3' })
+
+                    const responseText =
+                      typeof result.response === 'string' ? result.response : JSON.stringify(result.response ?? result)
+
+                    setDescriptionAiTooltip({ isOpen: true, variant: 'normal', text: responseText })
+                  } catch (e) {
+                    const message = e instanceof Error ? e.message : String(e)
+                    setDescriptionAiTooltip({ isOpen: true, variant: 'error', text: message })
+                  }
+                }}
+              />
+
+              {descriptionAiTooltip.isOpen ? (
+                <AiTooltip
+                  variant={descriptionAiTooltip.variant}
+                  text={descriptionAiTooltip.text}
+                  onClose={() => setDescriptionAiTooltip((prev) => ({ ...prev, isOpen: false }))}
+                  onAttach={() => {
+                    if (descriptionAiTooltip.variant === 'normal') {
+                      setForm((prev) => ({
+                        ...prev,
+                        description: descriptionAiTooltip.text.slice(0, DESCRIPTION_LIMIT),
+                      }))
+                    }
+                    setDescriptionAiTooltip((prev) => ({ ...prev, isOpen: false }))
+                  }}
+                />
+              ) : null}
+            </div>
           </div>
         </div>
 

@@ -767,31 +767,74 @@ hr {
 
 /* ai-fail-tooltip */
 
-.ai-fail-tooltip {
-    background-color: var(--tooltip-bg-color);
+.ai-tooltip {
+    background-color: var(--elements-bg-color);
     box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.15);
     padding: 8px;
-    max-width: 332px;
+    min-width: 520px;
+    height: auto;
 }
 
-.ai-fail-tooltip-close-btn {
-    background-color: var(--tooltip-close-btn-color);
+.ai-tooltip-anchor {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.ai-tooltip-anchor .ai-tooltip {
+    position: absolute;
+    z-index: 50;
+    bottom: 0;
+    left: calc(100% + 12px);
+}
+
+.fail {
+    background-color: var(--tooltip-bg-color);
+}
+
+.ai-tooltip-close-btn, .ai-tooltip-attach-btn {
+    background-color: var(--edit-btn-color);
     border: 1px solid var(--tooltip-btn-border-color);
     border-radius: 8px;
     padding: 8px 12px;
     cursor: pointer;
+    color: var(--elements-bg-color);
+    box-shadow: 0 2px 0 0 rgb(0, 0, 0, 0.043);
 }
 
-.ai-fail-tooltip h5 {
-    color: var(--red-tooltip-color);
+.ai-tooltip-attach-btn {
+    margin-right: 10px;
+}
+
+.ai-tooltip-close-btn {
+    background-color: var(--elements-bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--main-text-color);
+    box-shadow: 0 2px 0 0 rgb(0, 0, 0, 0.016);
+}
+
+.fail button {
+    background-color: var(--tooltip-close-btn-color);
+    color: var(--main-text-color);
+    margin-left: 0;
+}
+
+.ai-tooltip h5 {
+    color: var(--main-text-color);
     margin: 0;
     margin-bottom: 8px;
 }
 
-.ai-fail-tooltip p {
+.fail h5 {
+    color: var(--red-tooltip-color);
+}
+
+.ai-tooltip p {
     margin: 0;
     margin-bottom: 8px;
     font-size: 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 /* ad-edit page */
@@ -804,8 +847,15 @@ hr {
 .ad-edit-title {
     font-size: 30px;
     font-weight: 600;
-    margin: 0 0 24px;
+    margin: 0;
     line-height: 1.2;
+}
+
+.ad-edit-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
 }
 
 .ad-edit-form {
@@ -862,7 +912,6 @@ hr {
     border: 1px solid #ff4d4f;
 }
 
-/* Селекты: своя стрелка, отступ слева и справа от края до текста / до иконки согласован */
 .ad-edit-page select.ad-edit-control {
     appearance: none;
     -webkit-appearance: none;
