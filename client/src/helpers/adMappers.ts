@@ -80,3 +80,89 @@ export const mapAdDetailsToEditForm = (ad: AdDetails): AdEditFormState => {
     },
   }
 }
+
+const toTrimmedOrUndefined = (value: string) => {
+  const v = value.trim()
+  return v.length ? v : undefined
+}
+
+const toPositiveIntOrUndefined = (value: string) => {
+  const v = value.trim()
+  if (!v.length) return undefined
+  const n = Number(v)
+  return Number.isInteger(n) && n > 0 ? n : undefined
+}
+
+const toPositiveNumberOrUndefined = (value: string) => {
+  const v = value.trim()
+  if (!v.length) return undefined
+  const n = Number(v)
+  return Number.isFinite(n) && n > 0 ? n : undefined
+}
+
+export const mapAdEditFormToUpdateIn = (form: AdEditFormState) => {
+  const description = toTrimmedOrUndefined(form.description)
+  const price = Number(form.price)
+
+  if (form.category === 'auto') {
+    return {
+      category: form.category,
+      title: form.title.trim(),
+      description,
+      price,
+      params: {
+        brand: toTrimmedOrUndefined(form.autoParams.brand),
+        model: toTrimmedOrUndefined(form.autoParams.model),
+        yearOfManufacture: toPositiveIntOrUndefined(form.autoParams.yearOfManufacture),
+        transmission:
+          form.autoParams.transmission === 'automatic' || form.autoParams.transmission === 'manual'
+            ? form.autoParams.transmission
+            : undefined,
+        mileage: toPositiveNumberOrUndefined(form.autoParams.mileage),
+        enginePower: toPositiveIntOrUndefined(form.autoParams.enginePower),
+      },
+    } as const
+  }
+
+  if (form.category === 'real_estate') {
+    return {
+      category: form.category,
+      title: form.title.trim(),
+      description,
+      price,
+      params: {
+        type:
+          form.realEstateParams.type === 'flat' ||
+          form.realEstateParams.type === 'house' ||
+          form.realEstateParams.type === 'room'
+            ? form.realEstateParams.type
+            : undefined,
+        address: toTrimmedOrUndefined(form.realEstateParams.address),
+        area: toPositiveNumberOrUndefined(form.realEstateParams.area),
+        floor: toPositiveIntOrUndefined(form.realEstateParams.floor),
+      },
+    } as const
+  }
+
+  return {
+    category: form.category,
+    title: form.title.trim(),
+    description,
+    price,
+    params: {
+      type:
+        form.electronicsParams.type === 'phone' ||
+        form.electronicsParams.type === 'laptop' ||
+        form.electronicsParams.type === 'misc'
+          ? form.electronicsParams.type
+          : undefined,
+      brand: toTrimmedOrUndefined(form.electronicsParams.brand),
+      model: toTrimmedOrUndefined(form.electronicsParams.model),
+      condition:
+        form.electronicsParams.condition === 'new' || form.electronicsParams.condition === 'used'
+          ? form.electronicsParams.condition
+          : undefined,
+      color: toTrimmedOrUndefined(form.electronicsParams.color),
+    },
+  } as const
+}

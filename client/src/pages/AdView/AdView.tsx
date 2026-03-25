@@ -52,7 +52,12 @@ export default function AdView() {
     Boolean(createdAtDate && updatedAtDate) &&
     updatedAtDate!.getTime() > createdAtDate!.getTime()
 
-  if (isLoading) return <p>Загрузка...</p>
+  if (isLoading)
+    return (
+      <div className="page-loading">
+        <h1>Загружаем страницу....</h1>
+      </div>
+    )
   if (error) return <p>{error}</p>
   if (!ad) return <p>Объявление не найдено</p>
 

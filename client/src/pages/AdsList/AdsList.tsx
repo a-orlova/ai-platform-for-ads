@@ -81,7 +81,7 @@ export default function AdsList() {
 
         setAds(data.items)
         setTotalItems(data.total)
-      } catch (e) {
+      } catch {
         if (requestId !== requestIdRef.current) return
         setError("Ошибка загрузки")
       } finally {
@@ -122,7 +122,12 @@ export default function AdsList() {
     setCurrentPage(1)
   }
 
-  if (isInitialLoading) return <p>Загрузка...</p>
+  if (isInitialLoading)
+    return (
+      <div className="page-loading">
+        <h1>Загружаем страницу....</h1>
+      </div>
+    )
   if (error) return <p>{error}</p>
 
   return(

@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getAdById } from '../../api/getAds'
+import { updateAd } from '../../api/updateAd'
 import { getInitialAdEditFormState, mapAdDetailsToEditForm } from '../../helpers/adMappers'
 import { requiredFieldMessage } from '../../helpers/adEditMessages'
 import { canSaveAdEdit, isPriceFilled, isTypeFilled } from '../../helpers/adEditValidation'
@@ -10,8 +11,11 @@ import AiQuestionBtn from './components/AiQuestionBtn.tsx'
 import { generateOllama } from '../../api/ollamaClient'
 import AiTooltip, { type AiTooltipVariant } from './components/AiTooltip'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import Alert from '@mui/material/Alert'
+import Snackbar from '@mui/material/Snackbar'
 
 const DESCRIPTION_LIMIT = 1000
+const AD_EDIT_DRAFT_PREFIX = 'ad-edit-draft'
 
 const categoryLabels: Record<Category, string> = {
   auto: 'Транспорт',
@@ -30,7 +34,17 @@ export default function AdEdit() {
   const navigate = useNavigate()
   const [form, setForm] = React.useState<AdEditFormState>(getInitialAdEditFormState)
   const [isLoading, setIsLoading] = React.useState(true)
+  const [isSaving, setIsSaving] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const [toast, setToast] = React.useState<{
+    open: boolean
+    severity: 'success' | 'error'
+    message: string
+  }>({ open: false, severity: 'success', message: '' })
+  const toastRedirectTimerRef = React.useRef<number | null>(null)
+  const redirectOverlayTimerRef = React.useRef<number | null>(null)
+  const [isRedirecting, setIsRedirecting] = React.useState(false)
+  const [isDarkTheme, setIsDarkTheme] = React.useState(false)
   const [touched, setTouched] = React.useState<TouchedFields>({
     title: false,
     price: false,
@@ -55,6 +69,22 @@ export default function AdEdit() {
     touched.type && !isTypeFilled(form.category, form) && (form.category === 'electronics' || form.category === 'real_estate')
 
   const saveEnabled = canSaveAdEdit(form)
+  const adId = React.useMemo(() => {
+    const parsed = Number(id)
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : null
+  }, [id])
+  const draftKey = adId ? `${AD_EDIT_DRAFT_PREFIX}:${adId}` : null
+
+  React.useEffect(() => {
+    return () => {
+      if (toastRedirectTimerRef.current) window.clearTimeout(toastRedirectTimerRef.current)
+      if (redirectOverlayTimerRef.current) window.clearTimeout(redirectOverlayTimerRef.current)
+    }
+  }, [])
+
+  React.useEffect(() => {
+    setIsDarkTheme(document.documentElement.getAttribute('data-theme') === 'dark')
+  }, [])
 
   const titleClass =
     showTitleError ? 'ad-edit-control ad-edit-control--error' : 'ad-edit-control ad-edit-control--filled'
@@ -66,8 +96,7 @@ export default function AdEdit() {
       : 'ad-edit-control ad-edit-control--filled'
 
   React.useEffect(() => {
-    const adId = Number(id)
-    if (!Number.isInteger(adId) || adId <= 0) {
+    if (!adId) {
       setError('Некорректный идентификатор объявления')
       setIsLoading(false)
       return
@@ -79,7 +108,19 @@ export default function AdEdit() {
 
       try {
         const ad = await getAdById(adId)
-        setForm(mapAdDetailsToEditForm(ad))
+        const baseForm = mapAdDetailsToEditForm(ad)
+        const rawDraft = localStorage.getItem(draftKey ?? '')
+
+        if (rawDraft) {
+          try {
+            const parsed = JSON.parse(rawDraft) as AdEditFormState
+            setForm(parsed)
+          } catch {
+            setForm(baseForm)
+          }
+        } else {
+          setForm(baseForm)
+        }
       } catch {
         setError('Ошибка загрузки объявления')
       } finally {
@@ -88,20 +129,103 @@ export default function AdEdit() {
     }
 
     loadAd()
-  }, [id])
+  }, [adId, draftKey])
 
-  if (isLoading) return <p>Загрузка...</p>
+  React.useEffect(() => {
+    if (!draftKey) return
+    if (isLoading || error) return
+    localStorage.setItem(draftKey, JSON.stringify(form))
+  }, [draftKey, form, isLoading, error])
+
+  const handleCancelAndGoBack = () => {
+    if (draftKey) localStorage.removeItem(draftKey)
+    if (adId) navigate(`/ads/${adId}`)
+    else navigate('/ads')
+  }
+
+  const handleSave = async () => {
+    if (!adId) return
+    if (!saveEnabled) return
+    if (toastRedirectTimerRef.current) {
+      window.clearTimeout(toastRedirectTimerRef.current)
+      toastRedirectTimerRef.current = null
+    }
+    if (redirectOverlayTimerRef.current) {
+      window.clearTimeout(redirectOverlayTimerRef.current)
+      redirectOverlayTimerRef.current = null
+    }
+    setIsRedirecting(false)
+    setIsSaving(true)
+    setError(null)
+    try {
+      await updateAd(adId, form)
+      if (draftKey) localStorage.removeItem(draftKey)
+      setToast({ open: true, severity: 'success', message: 'Изменения сохранены' })
+      redirectOverlayTimerRef.current = window.setTimeout(() => setIsRedirecting(true), 1700)
+      toastRedirectTimerRef.current = window.setTimeout(() => navigate(`/ads/${adId}`), 2000)
+    } catch {
+      setIsRedirecting(false)
+      setToast({
+        open: true,
+        severity: 'error',
+        message: 'Ошибка сохранения',
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  if (isLoading)
+    return (
+      <div className="page-loading">
+        <h1>Загружаем страницу....</h1>
+      </div>
+    )
   if (error) return <p>{error}</p>
 
   return (
     <main className="ad-edit-page">
+      <Snackbar
+        open={toast.open}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        onClose={() => setToast(prev => ({ ...prev, open: false }))}
+        autoHideDuration={5000}
+      >
+        <Alert
+          onClose={() => setToast(prev => ({ ...prev, open: false }))}
+          severity={toast.severity}
+          variant="filled"
+          sx={{
+            alignItems: 'center',
+            color: 'inherit',
+            border: '1px solid transparent',
+            ...(toast.severity === 'success'
+              ? {
+                  backgroundColor: isDarkTheme ? '#9EDC76' : '#B7EB8F',
+                  borderColor: isDarkTheme ? '#9EDC76' : '#B7EB8F',
+                  '& .MuiAlert-icon': { color: isDarkTheme ? '#389E0D' : '#52C41A' },
+                }
+              : {
+                  backgroundColor: isDarkTheme ? '#FBE0DE' : '#FFF1F0',
+                  borderColor: isDarkTheme ? '#FFB8B0' : '#FFCCC7',
+                  '& .MuiAlert-icon': { color: isDarkTheme ? '#D9363E' : '#FF4D4F' },
+                }),
+          }}
+        >
+          {toast.message}
+        </Alert>
+      </Snackbar>
+
+      {isRedirecting ? (
+        <div className="page-transition-overlay">
+          <h1>Загружаем страницу....</h1>
+        </div>
+      ) : null}
+
       <div className="ad-edit-title-row">
         <button
           className="ad-view-back-btn"
-          onClick={() => {
-            if (id) navigate(`/ads/${id}`)
-            else navigate('/ads')
-          }}
+          onClick={handleCancelAndGoBack}
           aria-label="Назад к объявлению"
         >
           <ArrowBackIcon />
@@ -113,6 +237,7 @@ export default function AdEdit() {
         className="ad-edit-form"
         onSubmit={(e) => {
           e.preventDefault()
+          void handleSave()
         }}
       >
         <div className="ad-edit-field">
@@ -196,7 +321,7 @@ export default function AdEdit() {
                 onClick={async () => {
                   const prompt =
                     'Оцени рыночную цену объявления на Авито с характеристиками ниже.\n' +
-                    'Ответь сжатым текстом на 3-5 строк на русском языке, какую цену можно установить, опираясь на характеристики товара.\n\n' +
+                    'Ответь сжатым текстом на 3-5 строк на русском языке, пиши исключетльно информацию о цене и почему она такая, ничего лишнего, какую цену можно установить, опираясь на характеристики товара.\n\n' +
                     `Категория: ${form.category}\n` +
                     `Название: ${form.title || '(нет)'}\n` +
                     `Описание: ${form.description || '(нет)'}\n` +
@@ -275,12 +400,12 @@ export default function AdEdit() {
                 descriptionValue={form.description}
                 onClick={async () => {
                   const prompt = form.description.trim()
-                    ? 'Улучши описание объявления на Авито. Сохрани смысл, сделай текст более привлекательным и "продаваемым" на русском языке строго до 1000 символов.\n\n' +
+                    ? 'Улучши описание объявления на Авито. Дай ответ без лишних знаков, кавычек, только сам текст описания и все. Сохрани смысл, сделай текст более привлекательным и "продаваемым" на русском языке строго до 1000 символов.\n\n' +
                       `Категория: ${form.category}\n` +
                       `Название: ${form.title || '(нет)'}\n` +
                       `Характеристики: ${JSON.stringify(form, null, 2)}\n` +
                       `Текущее описание:\n${form.description}\n`
-                    : 'Придумай качественное описание объявления на Авито. Сохрани смысл, ориентируйся на данные ниже, сделай текст более привлекательным и "продаваемым" на русском языке строго до 1000 символов.\n\n' +
+                    : 'Придумай качественное описание объявления на Авито. Дай ответ без лишних знаков, кавычек, только сам текст описания и все. Сохрани смысл, ориентируйся на данные ниже, сделай текст более привлекательным и "продаваемым" на русском языке строго до 1000 символов.\n\n' +
                       `Категория: ${form.category}\n` +
                       `Название: ${form.title || '(нет)'}\n` +
                       `Характеристики: ${JSON.stringify(form, null, 2)}\n`
@@ -320,16 +445,13 @@ export default function AdEdit() {
         </div>
 
         <div className="ad-edit-actions">
-          <button type="submit" className="ad-edit-save" disabled={!saveEnabled}>
+          <button type="submit" className="ad-edit-save" disabled={!saveEnabled || isSaving}>
             Сохранить
           </button>
           <button
             type="button"
             className="ad-edit-cancel"
-            onClick={() => {
-              if (id) navigate(`/ads/${id}`)
-              else navigate('/ads')
-            }}
+            onClick={handleCancelAndGoBack}
           >
             Отменить
           </button>

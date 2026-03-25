@@ -11,7 +11,7 @@ export const getAds = async ({limit,
                               sortColumn,
                               sortDirection,
                             }: GetAdsParams = {}): Promise<{ items: Ad[]; total: number }> => {
-  const params: any = {}
+  const params: Record<string, unknown> = {}
   if (limit !== undefined) params.limit = limit
   if (skip !== undefined) params.skip = skip
   if (q?.trim()) params.q = q.trim()
