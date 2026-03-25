@@ -9,7 +9,11 @@ import type { AdEditFormState, Category } from '../../types'
 import AdEditParamsFields from './components/AdEditParamsFields'
 import AiQuestionBtn from './components/AiQuestionBtn.tsx'
 import { generateOllama } from '../../api/ollamaClient'
+import PageLoading from '../../components/PageLoading'
+import { buildImproveDescriptionPrompt, buildMarketPricePrompt } from '../../helpers/aiPrompts'
 import AiTooltip, { type AiTooltipVariant } from './components/AiTooltip'
+import { extractOllamaTextResponse } from '../../helpers/ollamaResponse'
+import { parsePositiveInt } from '../../helpers/parsePositiveInt'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import Alert from '@mui/material/Alert'
 import Snackbar from '@mui/material/Snackbar'
@@ -70,8 +74,7 @@ export default function AdEdit() {
 
   const saveEnabled = canSaveAdEdit(form)
   const adId = React.useMemo(() => {
-    const parsed = Number(id)
-    return Number.isInteger(parsed) && parsed > 0 ? parsed : null
+    return parsePositiveInt(id)
   }, [id])
   const draftKey = adId ? `${AD_EDIT_DRAFT_PREFIX}:${adId}` : null
 
@@ -176,11 +179,7 @@ export default function AdEdit() {
   }
 
   if (isLoading)
-    return (
-      <div className="page-loading">
-        <h1>Загружаем страницу....</h1>
-      </div>
-    )
+    return <PageLoading />
   if (error) return <p>{error}</p>
 
   return (
@@ -319,20 +318,12 @@ export default function AdEdit() {
               <AiQuestionBtn
                 mode="price"
                 onClick={async () => {
-                  const prompt =
-                    'Оцени рыночную цену объявления на Авито с характеристиками ниже.\n' +
-                    'Ответь сжатым текстом на 3-5 строк на русском языке, пиши исключетльно информацию о цене и почему она такая, ничего лишнего, какую цену можно установить, опираясь на характеристики товара.\n\n' +
-                    `Категория: ${form.category}\n` +
-                    `Название: ${form.title || '(нет)'}\n` +
-                    `Описание: ${form.description || '(нет)'}\n` +
-                    `Характеристики: ${JSON.stringify(form, null, 2)}\n` +
-                    `Текущая цена: ${form.price || '(нет)'}\n`
+                  const prompt = buildMarketPricePrompt(form)
 
                   try {
                     const result = await generateOllama({ prompt, model: 'llama3' })
 
-                    const responseText =
-                      typeof result.response === 'string' ? result.response : JSON.stringify(result.response ?? result)
+                    const responseText = extractOllamaTextResponse(result)
 
                     setPriceAiTooltip({ isOpen: true, variant: 'normal', text: responseText })
                   } catch (e) {
@@ -399,22 +390,12 @@ export default function AdEdit() {
                 mode="description"
                 descriptionValue={form.description}
                 onClick={async () => {
-                  const prompt = form.description.trim()
-                    ? 'Улучши описание объявления на Авито. Дай ответ без лишних знаков, кавычек, только сам текст описания и все. Сохрани смысл, сделай текст более привлекательным и "продаваемым" на русском языке строго до 1000 символов.\n\n' +
-                      `Категория: ${form.category}\n` +
-                      `Название: ${form.title || '(нет)'}\n` +
-                      `Характеристики: ${JSON.stringify(form, null, 2)}\n` +
-                      `Текущее описание:\n${form.description}\n`
-                    : 'Придумай качественное описание объявления на Авито. Дай ответ без лишних знаков, кавычек, только сам текст описания и все. Сохрани смысл, ориентируйся на данные ниже, сделай текст более привлекательным и "продаваемым" на русском языке строго до 1000 символов.\n\n' +
-                      `Категория: ${form.category}\n` +
-                      `Название: ${form.title || '(нет)'}\n` +
-                      `Характеристики: ${JSON.stringify(form, null, 2)}\n`
+                  const prompt = buildImproveDescriptionPrompt(form)
 
                   try {
                     const result = await generateOllama({ prompt, model: 'llama3' })
 
-                    const responseText =
-                      typeof result.response === 'string' ? result.response : JSON.stringify(result.response ?? result)
+                    const responseText = extractOllamaTextResponse(result)
 
                     setDescriptionAiTooltip({ isOpen: true, variant: 'normal', text: responseText })
                   } catch (e) {

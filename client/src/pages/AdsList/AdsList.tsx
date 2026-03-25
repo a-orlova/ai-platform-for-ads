@@ -3,6 +3,8 @@ import Filters from './components/Filters'
 import Item from './components/Item'
 import Pagination from './components/Pagination'
 import { getAds } from '../../api/getAds'
+import PageLoading from '../../components/PageLoading'
+import { useRequestIdGuard } from '../../hooks/useRequestIdGuard'
 import { ADS_LIST_STATE_STORAGE_KEY, readAdsListStoredState } from '../../helpers/adsListState'
 import type { Ad, Category, SortColumn, SortDirection, AdsListStoredState, ViewMode } from '../../types'
 import React from 'react'
@@ -23,7 +25,7 @@ export default function AdsList() {
   const [onlyNeedsRevision, setOnlyNeedsRevision] = React.useState(initialState.onlyNeedsRevision)
   const [sortColumn, setSortColumn] = React.useState<SortColumn>(initialState.sortColumn)
   const [sortDirection, setSortDirection] = React.useState<SortDirection>(initialState.sortDirection)
-  const requestIdRef = React.useRef(0)
+  const { nextRequestId, isLatest } = useRequestIdGuard()
 
   const itemsPerPage = 10
   
@@ -61,7 +63,7 @@ export default function AdsList() {
 
   React.useEffect(() => {
     const fetchAds = async () => {
-      const requestId = ++requestIdRef.current
+      const requestId = nextRequestId()
       setIsFetching(true)
       setError(null)
 
@@ -77,15 +79,15 @@ export default function AdsList() {
           sortDirection,
         })
 
-        if (requestId !== requestIdRef.current) return
+        if (!isLatest(requestId)) return
 
         setAds(data.items)
         setTotalItems(data.total)
       } catch {
-        if (requestId !== requestIdRef.current) return
+        if (!isLatest(requestId)) return
         setError("Ошибка загрузки")
       } finally {
-        if (requestId === requestIdRef.current) {
+        if (isLatest(requestId)) {
           setIsInitialLoading(false)
           setIsFetching(false)
         }
@@ -100,6 +102,8 @@ export default function AdsList() {
     onlyNeedsRevision,
     sortColumn,
     sortDirection,
+    nextRequestId,
+    isLatest,
   ])
 
   function handleSortChange(value: string) {
@@ -123,11 +127,7 @@ export default function AdsList() {
   }
 
   if (isInitialLoading)
-    return (
-      <div className="page-loading">
-        <h1>Загружаем страницу....</h1>
-      </div>
-    )
+    return <PageLoading />
   if (error) return <p>{error}</p>
 
   return(

@@ -3,48 +3,51 @@ import { useNavigate, useParams} from 'react-router-dom'
 import { getAdById } from '../../api/getAds'
 import type { AdDetails } from '../../types'
 import { formatDateTime, formatPrice, parseDateValue } from '../../helpers/adFormatters'
+import PageLoading from '../../components/PageLoading'
+import { useRequestIdGuard } from '../../hooks/useRequestIdGuard'
 import AdViewHeader from './components/AdViewHeader'
 import ImageGallery from './components/ImageGallery'
 import NeedsRevisionAlert from './components/NeedsRevisionAlert'
 import FeaturesList from './components/FeaturesList'
+import { parsePositiveInt } from '../../helpers/parsePositiveInt'
 
 export default function AdView() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const requestIdRef = React.useRef(0)
+  const { nextRequestId, isLatest } = useRequestIdGuard()
   const [ad, setAd] = React.useState<AdDetails | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    const parsedId = Number(id)
-    if (!Number.isInteger(parsedId) || parsedId <= 0) {
+    const parsedId = parsePositiveInt(id)
+    if (!parsedId) {
       setError('Некорректный идентификатор объявления')
       setIsLoading(false)
       return
     }
 
     const fetchAd = async () => {
-      const requestId = ++requestIdRef.current
+      const requestId = nextRequestId()
       setIsLoading(true)
       setError(null)
 
       try {
         const details = await getAdById(parsedId)
-        if (requestId !== requestIdRef.current) return
+        if (!isLatest(requestId)) return
         setAd(details)
       } catch {
-        if (requestId !== requestIdRef.current) return
+        if (!isLatest(requestId)) return
         setError('Ошибка загрузки объявления')
       } finally {
-        if (requestId === requestIdRef.current) {
+        if (isLatest(requestId)) {
           setIsLoading(false)
         }
       }
     }
 
     fetchAd()
-  }, [id])
+  }, [id, nextRequestId, isLatest])
 
   const createdAtDate = parseDateValue(ad?.createdAt ?? '')
   const updatedAtDate = parseDateValue(ad?.updatedAt ?? '')
@@ -53,11 +56,7 @@ export default function AdView() {
     updatedAtDate!.getTime() > createdAtDate!.getTime()
 
   if (isLoading)
-    return (
-      <div className="page-loading">
-        <h1>Загружаем страницу....</h1>
-      </div>
-    )
+    return <PageLoading />
   if (error) return <p>{error}</p>
   if (!ad) return <p>Объявление не найдено</p>
 
