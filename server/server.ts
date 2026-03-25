@@ -25,6 +25,21 @@ fastify.use((_, reply, next) => {
   next();
 });
 
+fastify.options('/*', (request, reply) => {
+  const requestedHeaders = request.headers['access-control-request-headers'];
+  const allowHeaders =
+    typeof requestedHeaders === 'string' && requestedHeaders.trim().length
+      ? requestedHeaders
+      : 'Content-Type';
+
+  reply
+    .header('Access-Control-Allow-Origin', '*')
+    .header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    .header('Access-Control-Allow-Headers', allowHeaders)
+    .code(204)
+    .send();
+});
+
 interface ItemGetRequest extends Fastify.RequestGenericInterface {
   Params: {
     id: string;
