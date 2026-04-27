@@ -9,6 +9,11 @@
 - `ESLint` — линтер
 - `Material UI` — компоненты интерфейса
 
+## Тестирование
+
+Ссылка на чек-лист и тест-кейсы: 
+https://docs.google.com/spreadsheets/d/1CST9JliZyBqV9won_1cl_2uTRlF3VrvbgtG0Q1GKXAk/edit?usp=sharing
+
 ## Что реализовано
 
 Клиент включает 3 уникальные страницы и роутинг:
