@@ -1,11 +1,4 @@
-# Avito Test Task - личный кабинет продавца с интегрированным AI-ассистентом, который помогает улучшать описания объявлений
-
-## Требования
-
-- `Node.js >= 20`
-- `React >= 18`
-- `react-router-dom`
-- `TypeScript`
+# Личный кабинет продавца с интегрированным AI-ассистентом, который помогает улучшать описания объявлений
 
 ## Стек и использованные инструменты
 
@@ -16,9 +9,10 @@
 - `ESLint` — линтер
 - `Material UI` — компоненты интерфейса
 
-Prettier не подключался, так как в проекте достаточно ESLint и TS, чтобы поддерживать единый стиль кода
+## Тестирование
 
-Стейт-менеджмент также не использовался, так как задача достаточно компактная и критическое состояние есть только на основных страницах
+Ссылка на чек-лист и тест-кейсы: 
+https://docs.google.com/spreadsheets/d/1CST9JliZyBqV9won_1cl_2uTRlF3VrvbgtG0Q1GKXAk/edit?usp=sharing
 
 ## Что реализовано
 
@@ -107,5 +101,25 @@ npm run dev
 ## Сложности
 
 - **Мигание темы при первой отрисовке**: на момент первого рендера страница могла успеть отобразиться с дефолтной светлой темой. Чтобы убрать это моргание, тема выставляется до запуска JS: в `client/index.html` добавлен inline-script, который читает `localStorage.theme` и сразу задаёт `data-theme`, а также inline-style для fallback-цветов `body`.
+
+## Приложение
+
+<img width="1280" height="676" alt="image" src="https://github.com/user-attachments/assets/090e0e25-0356-4447-bac9-80289b71831e" />
+
+<img width="1280" height="446" alt="image" src="https://github.com/user-attachments/assets/22378ba9-3e94-4e83-a5d3-443128a4aff6" />
+
+<img width="1280" height="579" alt="image" src="https://github.com/user-attachments/assets/70d464ed-6372-4ca6-bfa5-5df2dc37c0ec" />
+
+<img width="1280" height="728" alt="image" src="https://github.com/user-attachments/assets/ebca482f-98b2-4aa5-a131-c61d28085db9" />
+
+<img width="1141" height="534" alt="image" src="https://github.com/user-attachments/assets/e1834349-e756-4bde-afa8-7f93207cdf8a" />
+
+<img width="1280" height="648" alt="image" src="https://github.com/user-attachments/assets/6747ccf0-4fe0-44f8-896b-a70215912d73" />
+
+<img width="1280" height="498" alt="image" src="https://github.com/user-attachments/assets/d7a4a3cd-7992-4105-829a-ae0d1703ae05" />
+
+<img width="1280" height="466" alt="image" src="https://github.com/user-attachments/assets/45d5d9df-1009-4306-9517-ebc077eb8f69" />
+
+
 
 
