@@ -1,9 +1,5 @@
 import React from 'react'
 
-/**
- * Хелпер для защиты от гонок при асинхронной загрузке:
- * если пришёл более старый запрос — игнорируем результат.
- */
 export function useRequestIdGuard() {
   const requestIdRef = React.useRef(0)
 
